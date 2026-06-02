@@ -5,3 +5,12 @@ PROC IMPORT OUT=FCRData
 			
 GETNAMES=YES; 
 RUN;
+proc sort data=FCRData out=FCR;
+by Stage;
+run;
+
+proc lifetest data=FCR outsurv=surv_exp noprint;
+  time Survival*death(0);
+  strata Race;
+  by Stage;
+run;
