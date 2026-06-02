@@ -20,3 +20,9 @@ proc lifetest data=FCR outsurv=surv_exp noprint;
   strata Race;
   by Stage;
 run;
+
+proc sgplot data=surv_exp noborder;
+    /* Step plot for survival curves */
+    step x=Time y=SURVIVAL / group=Race name="SurvLine" lineattrs=(thickness=2);
+	by Stage;
+run;
