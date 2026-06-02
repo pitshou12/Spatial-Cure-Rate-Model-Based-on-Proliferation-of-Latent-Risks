@@ -1,0 +1,7 @@
+/*Data Import */
+PROC IMPORT OUT=FCRData
+            DATAFILE= "\\tsclient\Remote virtual drive\Uploads\Survival_Rust_FCRData-original.csv"
+            DBMS=CSV REPLACE;
+			
+GETNAMES=YES; 
+RUN;
