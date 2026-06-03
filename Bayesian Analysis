@@ -7,22 +7,33 @@ GETNAMES=YES;
 RUN;
 data FCRData;
 set FCRData;
+if Stage=1 then stage='L';
+else if Stage=2 then stage='R';
+else stage='D';
 Time=Survival/365;
 run;
 
+
 proc sort data=FCRData out=FCR;
-by Stage;
+by stage;
 run;
 
 
 proc lifetest data=FCR outsurv=surv_exp noprint;
   time Time*death(0);
   strata Race;
-  by Stage;
+  by stage;
 run;
 
-proc sgplot data=surv_exp noborder;
+*options nobyline;
+proc sgplot data=surv_exp noautolegend noborder;
     /* Step plot for survival curves */
     step x=Time y=SURVIVAL / group=Race name="SurvLine" lineattrs=(thickness=2);
-	by Stage;
+	by stage;
+	yaxis label='survival probability' values=(0 0.2 0.4 0.6 0.8 1)
+	       labelattrs=(weight=bold family="Arial" size=18)
+           valueattrs=(weight=bold size=18 color=black);
+     xaxis label='time (years)' max=8
+	       labelattrs=(weight=bold family="Arial" size=18)
+           valueattrs=(weight=bold size=18 color=black);
 run;
