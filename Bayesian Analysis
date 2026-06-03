@@ -5,31 +5,31 @@ PROC IMPORT OUT=FCRData
 			
 GETNAMES=YES; 
 RUN;
+
 data FCRData;
 set FCRData;
-if Stage=1 then stagetype='L';
-else if Stage=2 then stagetype='R';
-else stagetype='D';
+if Stage=1 then BCstage='Local';
+else if Stage=2 then BCstage='Rgional';
+else BCstage='Distant';
 Time=Survival/365;
 run;
 
 
 proc sort data=FCRData out=FCR;
-by stagetype;
+by BCstage;
 run;
 
 
 proc lifetest data=FCR outsurv=surv_exp noprint;
   time Time*death(0);
   strata Race;
-  by stagetype;
+  by BCstage;
 run;
 
-*options nobyline;
 proc sgplot data=surv_exp noautolegend noborder;
     /* Step plot for survival curves */
     step x=Time y=SURVIVAL / group=Race name="SurvLine" lineattrs=(thickness=2);
-	by stagetype;
+	by BCstage;
 	yaxis label='survival probability' values=(0 0.2 0.4 0.6 0.8 1)
 	       labelattrs=(weight=bold family="Arial" size=18)
            valueattrs=(weight=bold size=18 color=black);
