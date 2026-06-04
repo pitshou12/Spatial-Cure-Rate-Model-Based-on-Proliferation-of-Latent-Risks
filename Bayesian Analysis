@@ -9,7 +9,7 @@ RUN;
 data FCRData;
 set FCRData;
 if Stage=1 then BCstage='Local';
-else if Stage=2 then BCstage='Rgional';
+else if Stage=2 then BCstage='Regional';
 else BCstage='Distant';
 Time=Survival/365;
 run;
@@ -26,6 +26,7 @@ proc lifetest data=FCR outsurv=surv_exp noprint;
   by BCstage;
 run;
 
+options nobyline;
 proc sgplot data=surv_exp noautolegend noborder;
     /* Step plot for survival curves */
     step x=Time y=SURVIVAL / group=Race name="SurvLine" lineattrs=(thickness=2);
