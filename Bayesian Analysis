@@ -71,7 +71,7 @@ run;
 
 /*Bayesian Estimates of CSCR model for EA*/
 PROC MCMC DATA=FCR_EA outpost=EA0 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
-monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1);
+monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda theta);
 PARMS beta0=0.28,beta1=0.17,beta2=0.04,beta3=0.06,beta4=0.13,beta5=-0.19,beta6=-0.004,lambda=5,theta=0.2;
 PRIOR beta0 ~ normal(0.28,sd=0.1);PRIOR beta1 ~ normal(0.17,sd=0.05);PRIOR beta2 ~ normal(0.04,sd=0.05);
 PRIOR beta3 ~ normal(0.06,sd=0.05);PRIOR beta4 ~ normal(0.13,sd=0.05);PRIOR beta5 ~ normal(-0.19,sd=0.05);
