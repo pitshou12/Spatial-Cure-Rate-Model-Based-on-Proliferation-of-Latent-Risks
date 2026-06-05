@@ -15,7 +15,7 @@ Time=Survival/365;
 x1=TX_Delay;x2=BX_Delay;
 if Tgrade=2 then x3=1;else x3=0;
 if Tgrade=3 then x4=1;else x4=0;
-x5=HR_p;x6=Age;
+x5=HR_p;x6=Age-62;
 run;
 
 proc sort data=FCRData out=FCR;
