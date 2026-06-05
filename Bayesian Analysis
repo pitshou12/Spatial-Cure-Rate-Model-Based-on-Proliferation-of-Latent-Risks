@@ -59,9 +59,10 @@ proc sgplot data=surv_exp1 noautolegend noborder;
            valueattrs=(weight=bold size=18 color=black);
 run;
 
+/*For EA race */
 data FCR_local;
 set FCRData;
-if Stage=1;
+if Race=1;
 run;
 
 
