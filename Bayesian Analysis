@@ -60,21 +60,25 @@ proc sgplot data=surv_exp1 noautolegend noborder;
 run;
 
 /*For EA race */
-data FCR_local;
+data FCR_EA1;
 set FCRData;
 if Race=1;
 run;
 
+proc sort data=FCR_EA1 out=FCR_EA;
+by BCstage;
+run;
 
-/*Bayesian Estimates and cure-rates for SSVLR_P model in local stratum*/
-PROC MCMC DATA=FCR_local outpost=FCR_local1 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
-monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6);
-PARMS beta0=0.48,beta1=0,beta2=0,beta3=0,beta4=0,beta5=0,beta6=0,lambda=1,gamma1=0.;
-PRIOR beta0 ~ normal(0.48,sd=0.1);PRIOR beta1 ~ normal(0,sd=0.05);PRIOR beta2 ~ normal(0,sd=0.05);
-PRIOR beta3 ~ normal(0,sd=0.05);PRIOR beta4 ~ normal(0,sd=0.05);PRIOR beta5 ~ normal(0,sd=0.05);
-PRIOR beta6 ~ normal(0,sd=0.05);
-PRIOR lambda ~ normal(1,sd=0.1,lower=0); 
-PRIOR gamma1 ~ normal(0.01,sd=0.004,lower=0);
+/*Bayesian Estimates of SSVLR_P model for EA*/
+PROC MCMC DATA=FCR_EA outpost=EA1 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
+monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1);
+PARMS beta0=0.28,beta1=0.17,beta2=0.04,beta3=0.06,beta4=0.13,beta5=-0.19,beta6=-0.004,lambda=5,gamma1=0.2;
+PRIOR beta0 ~ normal(0.28,sd=0.1);PRIOR beta1 ~ normal(0.17,sd=0.05);PRIOR beta2 ~ normal(0.04,sd=0.05);
+PRIOR beta3 ~ normal(0.06,sd=0.05);PRIOR beta4 ~ normal(0.13,sd=0.05);PRIOR beta5 ~ normal(-0.19,sd=0.05);
+PRIOR beta6 ~ normal(-0.004,sd=0.05);
+PRIOR lambda ~ normal(3,sd=0.1,lower=0); 
+PRIOR gamma1 ~ normal(0.2,sd=0.004,lower=0);
+by BCstage;
 theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 *cure_Eur=exp(-exp(beta0));
 *cure_Afr=exp(-exp(beta0+beta1));
@@ -82,7 +86,7 @@ theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 alpha= gamma1 / lambda;
 Sc= exp(-theta*(1-exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time))));
 hc=theta*(gamma1-alpha*lambda*exp(-lambda*Time))*exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time));
-fc=hc*Sc;
+if (hc>0 and Sc>0) then fc=hc*Sc;
 L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
