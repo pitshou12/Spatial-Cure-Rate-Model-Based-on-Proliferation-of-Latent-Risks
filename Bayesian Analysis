@@ -86,7 +86,32 @@ theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 alpha= gamma1 / lambda;
 Sc= exp(-theta*(1-exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time))));
 hc=theta*(gamma1-alpha*lambda*exp(-lambda*Time))*exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time));
-if (hc>0 and Sc>0) then fc=hc*Sc;
+if (hc>0 and Sc>0);
+fc=hc*Sc;
+L=death*log(fc)+(1-death)*log(Sc);
+MODEL Time ~ GENERAL(L);
+RUN;
+
+/*Bayesian Estimates of SSVLR_B model for EA*/
+PROC MCMC DATA=FCR_EA outpost=EA2 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
+monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1);
+PARMS beta0=0.56,beta1=0.23,beta2=-0.05,beta3=0.03,beta4=0.18,beta5=-0.5,beta6=0.0003,lambda=5,gamma1=0.2;
+PRIOR beta0 ~ normal(0.56,sd=0.1);PRIOR beta1 ~ normal(0.23,sd=0.05);PRIOR beta2 ~ normal(-0.05,sd=0.05);
+PRIOR beta3 ~ normal(0.03,sd=0.05);PRIOR beta4 ~ normal(0.18,sd=0.05);PRIOR beta5 ~ normal(-0.5,sd=0.05);
+PRIOR beta6 ~ normal(0.0003,sd=0.05);
+PRIOR lambda ~ normal(5,sd=0.1,lower=0); 
+PRIOR gamma1 ~ normal(0.2,sd=0.004,lower=0);
+by BCstage;
+theta1 = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
+theta = theta1/(1+theta1);
+*cure_Eur=1-(exp(beta0)/(1+exp(beta0)));;
+*cure_Afr=1-(exp(beta0+beta1)/(1+exp(beta0+beta1)));
+*cure_Asian=1-(exp(beta0+beta2)/(1+exp(beta0+beta2)));
+alpha= gamma1 / lambda;
+Sc= 1-theta*(1-exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time)));
+fc=theta*(gamma1-alpha*lambda*exp(-lambda*Time))*exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time));
+if (fc>0 and Sc>0);
+hc=fc/Sc;
 L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
