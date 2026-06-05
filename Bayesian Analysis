@@ -69,12 +69,12 @@ run;
 /*Bayesian Estimates and cure-rates for SSVLR_P model in local stratum*/
 PROC MCMC DATA=FCR_local outpost=FCR_local1 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
 monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6);
-PARMS beta0=-10,beta1=0,beta2=0,beta3=0,beta4=0,beta5=0,beta6=0,lambda=1,gamma1=0.004;
-PRIOR beta0 ~ normal(-10,sd=0.1);PRIOR beta1 ~ normal(0,sd=0.05);PRIOR beta2 ~ normal(0,sd=0.05);
+PARMS beta0=0.48,beta1=0,beta2=0,beta3=0,beta4=0,beta5=0,beta6=0,lambda=1,gamma1=0.;
+PRIOR beta0 ~ normal(0.48,sd=0.1);PRIOR beta1 ~ normal(0,sd=0.05);PRIOR beta2 ~ normal(0,sd=0.05);
 PRIOR beta3 ~ normal(0,sd=0.05);PRIOR beta4 ~ normal(0,sd=0.05);PRIOR beta5 ~ normal(0,sd=0.05);
 PRIOR beta6 ~ normal(0,sd=0.05);
 PRIOR lambda ~ normal(1,sd=0.1,lower=0); 
-PRIOR gamma1 ~ normal(0.008,sd=0.004,lower=0);
+PRIOR gamma1 ~ normal(0.01,sd=0.004,lower=0);
 theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 *cure_Eur=exp(-exp(beta0));
 *cure_Afr=exp(-exp(beta0+beta1));
