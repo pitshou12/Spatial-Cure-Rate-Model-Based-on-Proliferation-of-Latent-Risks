@@ -138,4 +138,3 @@ hc=fc/Sc;
 L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
-
