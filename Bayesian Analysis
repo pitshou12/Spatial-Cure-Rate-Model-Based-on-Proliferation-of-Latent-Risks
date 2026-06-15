@@ -71,7 +71,7 @@ run;
 
 /*Bayesian Estimates of CSCR model for EA*/
 PROC MCMC DATA=FCR_EA outpost=EA0 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
-monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda theta);
+monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda theta Like);
 PARMS beta0=0.28,beta1=0.17,beta2=0.04,beta3=0.06,beta4=0.13,beta5=-0.19,beta6=-0.004,lambda=5,alpha=0.2;
 PRIOR beta0 ~ normal(0.28,sd=0.1);PRIOR beta1 ~ normal(0.17,sd=0.05);PRIOR beta2 ~ normal(0.04,sd=0.05);
 PRIOR beta3 ~ normal(0.06,sd=0.05);PRIOR beta4 ~ normal(0.13,sd=0.05);PRIOR beta5 ~ normal(-0.19,sd=0.05);
@@ -88,13 +88,14 @@ Sc= 1+exp(-theta)*(1-exp(theta*(1-S)));
 fc=alpha*lambda*(Time**alpha)*exp(-S);
 if (fc>0 and Sc>0);
 hc=fc/Sc;
+Like=(fc**death)*(Sc**(1-death));
 L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
 
 /*Bayesian Estimates of SSVLR_P model for EA*/
 PROC MCMC DATA=FCR_EA outpost=EA1 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
-monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1);
+monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1 Like);
 PARMS beta0=0.28,beta1=0.17,beta2=0.04,beta3=0.06,beta4=0.13,beta5=-0.19,beta6=-0.004,lambda=5,gamma1=0.2;
 PRIOR beta0 ~ normal(0.28,sd=0.1);PRIOR beta1 ~ normal(0.17,sd=0.05);PRIOR beta2 ~ normal(0.04,sd=0.05);
 PRIOR beta3 ~ normal(0.06,sd=0.05);PRIOR beta4 ~ normal(0.13,sd=0.05);PRIOR beta5 ~ normal(-0.19,sd=0.05);
@@ -111,13 +112,14 @@ Sc= exp(-theta*(1-exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time))));
 hc=theta*(gamma1-alpha*lambda*exp(-lambda*Time))*exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time));
 if (hc>0 and Sc>0);
 fc=hc*Sc;
+Like=(fc**death)*(Sc**(1-death));
 L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
 
 /*Bayesian Estimates of SSVLR_B model for EA*/
 PROC MCMC DATA=FCR_EA outpost=EA2 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
-monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1);
+monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1 Like);
 PARMS beta0=0.56,beta1=0.23,beta2=-0.05,beta3=0.03,beta4=0.18,beta5=-0.5,beta6=0.0003,lambda=5,gamma1=0.2;
 PRIOR beta0 ~ normal(0.56,sd=0.1);PRIOR beta1 ~ normal(0.23,sd=0.05);PRIOR beta2 ~ normal(-0.05,sd=0.05);
 PRIOR beta3 ~ normal(0.03,sd=0.05);PRIOR beta4 ~ normal(0.18,sd=0.05);PRIOR beta5 ~ normal(-0.5,sd=0.05);
@@ -135,6 +137,7 @@ Sc= 1-theta*(1-exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time)));
 fc=theta*(gamma1-alpha*lambda*exp(-lambda*Time))*exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time));
 if (fc>0 and Sc>0);
 hc=fc/Sc;
+Like=(fc**death)*(Sc**(1-death));
 L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
