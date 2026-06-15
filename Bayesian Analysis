@@ -186,3 +186,35 @@ Like=(fc**death)*(Sc**(1-death));
 cpo = 1 / mean(1 / Like);
 log_cpo = log(cpo);
 run;
+
+data dat1;
+merge FCR coe1;
+model='SSVLR_P';
+theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
+alpha= gamma1 / lambda;
+Sc= exp(-theta*(1-exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time))));
+hc=theta*(gamma1-alpha*lambda*exp(-lambda*Time))*exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time));
+if (hc>0 and Sc>0);
+fc=hc*Sc;
+Like=(fc**death)*(Sc**(1-death));
+/* Example: inverse of mean of inverse likelihoods */
+cpo = 1 / mean(1 / Like);
+log_cpo = log(cpo);
+run;
+
+
+data dat2;
+merge FCR coe2;
+model='SSVLR_B';
+theta1 = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
+theta = theta1/(1+theta1);
+alpha= gamma1 / lambda;
+Sc= 1-theta*(1-exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time)));
+fc=theta*(gamma1-alpha*lambda*exp(-lambda*Time))*exp(-gamma1*Time+alpha-alpha*exp(-lambda*Time));
+if (fc>0 and Sc>0);
+hc=fc/Sc;
+Like=(fc**death)*(Sc**(1-death));
+/* Example: inverse of mean of inverse likelihoods */
+cpo = 1 / mean(1 / Like);
+log_cpo = log(cpo);
+run;
