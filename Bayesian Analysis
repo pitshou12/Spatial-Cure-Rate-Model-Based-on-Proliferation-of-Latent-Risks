@@ -228,6 +228,6 @@ proc sgplot data=dat noautolegend;
            lineattrs=(PATTERN=4 color=green pattern=dash THICKNESS=1);
       loess x=obs y=cpo / group=model lineattrs=(pattern=solid color=black THICKNESS=2);
 	  by BCstage;
-	 yaxis label='Schoenfeld Residual for Linear Predictor';
-     xaxis label='Time';
+	 yaxis label='Conditional Predicted Ordinate (CPO)';
+     xaxis label='Observation';
    run;
