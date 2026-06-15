@@ -171,3 +171,18 @@ do i=1 to 76106;
  output;
 end;
 run;
+
+data dat0;
+merge FCR coe0;
+model='CSCR ';
+theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
+S=exp(-lambda*(Time**alpha));
+Sc= 1+exp(-theta)*(1-exp(theta*(1-S)));
+fc=alpha*lambda*(Time**alpha)*exp(-S);
+if (fc>0 and Sc>0);
+hc=fc/Sc;
+Like=(fc**death)*(Sc**(1-death));
+/* Example: inverse of mean of inverse likelihoods */
+cpo = 1 / mean(1 / Like);
+log_cpo = log(cpo);
+run;
