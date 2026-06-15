@@ -202,7 +202,6 @@ cpo = 1 / mean(1 / Like);
 log_cpo = log(cpo);
 run;
 
-
 data dat2;
 merge FCR coe2;
 model='SSVLR_B';
@@ -218,3 +217,17 @@ Like=(fc**death)*(Sc**(1-death));
 cpo = 1 / mean(1 / Like);
 log_cpo = log(cpo);
 run;
+
+data dat;
+ set dat0 dat1 dat2;
+ obs=_N_;
+run;
+
+proc sgplot data=dat noautolegend;
+	  refline 0 /
+           lineattrs=(PATTERN=4 color=green pattern=dash THICKNESS=1);
+      loess x=obs y=cpo / group=model lineattrs=(pattern=solid color=black THICKNESS=2);
+	  by BCstage;
+	 yaxis label='Schoenfeld Residual for Linear Predictor';
+     xaxis label='Time';
+   run;
