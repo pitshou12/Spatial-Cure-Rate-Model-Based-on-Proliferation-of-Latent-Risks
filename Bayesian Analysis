@@ -8,6 +8,8 @@ RUN;
 
 data FCRData;
 set FCRData;
+if Race=1 then BCRace='EA';
+else if Race=2 then BCRace='AA';
 if Stage=1 then BCstage='Local';
 else if Stage=2 then BCstage='Regional';
 else BCstage='Distant';
@@ -24,7 +26,7 @@ run;
 
 proc lifetest data=FCR outsurv=surv_exp noprint;
   time Time*death(0);
-  strata Race;
+  strata BCRace;
   by BCstage;
 run;
 
@@ -59,13 +61,17 @@ proc sgplot data=surv_exp1 noautolegend noborder;
            valueattrs=(weight=bold size=18 color=black);
 run;
 
-
-proc sort data=FCRData out=FCR;
-by Race BCstage;
+data EAData;
+set FCRData;
+if BCRace='EA';
 run;
 
-/*Bayesian Estimates of CSCR model */
-PROC MCMC DATA=FCR outpost=FCR0 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
+proc sort data=EAData out=EA;
+by BCstage;
+run;
+
+/*Bayesian Estimates of CSCR model for European-American race*/
+PROC MCMC DATA=EA outpost=EA0 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
 monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda alpha);
 PARMS beta0=0.28,beta1=0.17,beta2=0.04,beta3=0.06,beta4=0.13,beta5=-0.19,beta6=-0.004,lambda=5,alpha=0.2;
 PRIOR beta0 ~ normal(0.28,sd=0.1);PRIOR beta1 ~ normal(0.17,sd=0.05);PRIOR beta2 ~ normal(0.04,sd=0.05);
@@ -73,7 +79,7 @@ PRIOR beta3 ~ normal(0.06,sd=0.05);PRIOR beta4 ~ normal(0.13,sd=0.05);PRIOR beta
 PRIOR beta6 ~ normal(-0.004,sd=0.05);
 PRIOR lambda ~ normal(3,sd=0.1,lower=0); 
 PRIOR alpha ~ normal(0.2,sd=0.004,lower=0);
-by Race BCstage;
+by BCstage;
 theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 *cure_Eur=exp(-exp(beta0));
 *cure_Afr=exp(-exp(beta0+beta1));
@@ -88,8 +94,8 @@ L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
 
-/*Bayesian Estimates of SSVLR_P model */
-PROC MCMC DATA=FCR outpost=FCR1 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
+/*Bayesian Estimates of SSVLR_P model for European-American race*/
+PROC MCMC DATA=EA outpost=EA1 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
 monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1);
 PARMS beta0=0.28,beta1=0.17,beta2=0.04,beta3=0.06,beta4=0.13,beta5=-0.19,beta6=-0.004,lambda=5,gamma1=0.2;
 PRIOR beta0 ~ normal(0.28,sd=0.1);PRIOR beta1 ~ normal(0.17,sd=0.05);PRIOR beta2 ~ normal(0.04,sd=0.05);
@@ -97,7 +103,7 @@ PRIOR beta3 ~ normal(0.06,sd=0.05);PRIOR beta4 ~ normal(0.13,sd=0.05);PRIOR beta
 PRIOR beta6 ~ normal(-0.004,sd=0.05);
 PRIOR lambda ~ normal(3,sd=0.1,lower=0); 
 PRIOR gamma1 ~ normal(0.2,sd=0.004,lower=0);
-by Race BCstage;
+by BCstage;
 theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 *cure_Eur=exp(-exp(beta0));
 *cure_Afr=exp(-exp(beta0+beta1));
@@ -111,8 +117,8 @@ L=death*log(fc)+(1-death)*log(Sc);
 MODEL Time ~ GENERAL(L);
 RUN;
 
-/*Bayesian Estimates of SSVLR_B model*/
-PROC MCMC DATA=FCR outpost=FCR2 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
+/*Bayesian Estimates of SSVLR_B model for European-American race*/
+PROC MCMC DATA=EA outpost=EA2 seed=21228 nmc=50000 nbi=10000 opti = quanew STATS=ALL dic
 monitor=(beta0 beta1 beta2 beta3 beta4 beta5 beta6 lambda gamma1);
 PARMS beta0=0.56,beta1=0.23,beta2=-0.05,beta3=0.03,beta4=0.18,beta5=-0.5,beta6=0.0003,lambda=5,gamma1=0.2;
 PRIOR beta0 ~ normal(0.56,sd=0.1);PRIOR beta1 ~ normal(0.23,sd=0.05);PRIOR beta2 ~ normal(-0.05,sd=0.05);
@@ -120,7 +126,7 @@ PRIOR beta3 ~ normal(0.03,sd=0.05);PRIOR beta4 ~ normal(0.18,sd=0.05);PRIOR beta
 PRIOR beta6 ~ normal(0.0003,sd=0.05);
 PRIOR lambda ~ normal(5,sd=0.1,lower=0); 
 PRIOR gamma1 ~ normal(0.2,sd=0.004,lower=0);
-by Race BCstage;
+by BCstage;
 theta1 = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 theta = theta1/(1+theta1);
 *cure_Eur=1-(exp(beta0)/(1+exp(beta0)));;
@@ -136,44 +142,83 @@ MODEL Time ~ GENERAL(L);
 RUN;
 
 /*Medians of the posterior distribution for different models*/
-proc means data=FCR0 median nway;
+proc means data=EA0 median nway;
 	output out=coef0 median=;
-    by Race BCstage;
+    by BCstage;
 run;
 
-proc means data=FCR1 median nway;
+proc means data=EA1 median nway;
 	output out=coef1 median=;
-	by Race BCstage;
+	by BCstage;
 run;
 
-proc means data=FCR2 median nway;
+proc means data=EA2 median nway;
 	output out=coef2 median=;
-	by Race BCstage;
+	by BCstage;
+run;
+
+proc print data=coef0;
 run;
 
 data coe0;
 set coef0;
-do i=1 to 76106;
+if BCstage='Dista' then do;
+do i=1 to 2256;
  output;
+end;
+end;
+if BCstage='Local' then do;
+do i=1 to 48115;
+ output;
+end;
+end;
+else if BCstage='Regio' then do;
+do i=1 to 17498;
+ output;
+end;
 end;
 run;
 
 data coe1;
 set coef1;
-do i=1 to 76106;
+if BCstage='Dista' then do;
+do i=1 to 2256;
  output;
+end;
+end;
+if BCstage='Local' then do;
+do i=1 to 48115;
+ output;
+end;
+end;
+else if BCstage='Regio' then do;
+do i=1 to 17498;
+ output;
+end;
 end;
 run;
 
 data coe2;
 set coef2;
-do i=1 to 76106;
+if BCstage='Dista' then do;
+do i=1 to 2256;
  output;
+end;
+end;
+if BCstage='Local' then do;
+do i=1 to 48115;
+ output;
+end;
+end;
+else if BCstage='Regio' then do;
+do i=1 to 17498;
+ output;
+end;
 end;
 run;
 
-data dat0;
-merge FCR coe0;
+data datEA0;
+merge EAData coe0;
 model='CSCR ';
 theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 S=exp(-lambda*(Time**alpha));
@@ -182,13 +227,12 @@ fc=alpha*lambda*(Time**alpha)*exp(-S);
 if (fc>0 and Sc>0);
 hc=fc/Sc;
 Like=(fc**death)*(Sc**(1-death));
-/* Example: inverse of mean of inverse likelihoods */
 cpo = 1 / mean(1 / Like);
 log_cpo = log(cpo);
 run;
 
-data dat1;
-merge FCR coe1;
+data datEA1;
+merge EA coe1;
 model='SSVLR_P';
 theta = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 alpha= gamma1 / lambda;
@@ -202,8 +246,8 @@ cpo = 1 / mean(1 / Like);
 log_cpo = log(cpo);
 run;
 
-data dat2;
-merge FCR coe2;
+data datEA2;
+merge EA coe2;
 model='SSVLR_B';
 theta1 = exp(beta0+beta1*x1+beta2*x2+beta3*x3+beta4*x4+beta5*x5+beta6*x6);
 theta = theta1/(1+theta1);
@@ -218,9 +262,34 @@ cpo = 1 / mean(1 / Like);
 log_cpo = log(cpo);
 run;
 
+
+/* Compute CPO and LPML for European-American race*/
+proc means data=datEA0 sum;
+   var log_cpo;
+run;
+
+proc means data=datEA1 sum;
+   var log_cpo;
+run;
+
+proc means data=datEA2 sum;
+   var log_cpo;
+run;
+
+data cpo0;
+set datEA0;
+cpo1=cpo;
+obs1=_N_;
+if model='CSCR ' and BCstage='Local';
+run;
+
+
 data dat;
- set dat0 dat1 dat2;
+ set datEA0 datEA1 datEA2;
  obs=_N_;
+run;
+
+proc print data=dat (obs=1000);
 run;
 
 proc sgplot data=dat noautolegend;
